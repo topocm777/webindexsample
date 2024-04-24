@@ -1,0 +1,31 @@
+# HTML
+# Archive your static HTML project and save it with the build record.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: Hosted-Agent
+
+Variables:
+  - group: dev
+
+steps:
+- task: Docker@2
+  inputs:
+    command: 'build'
+    Dockerfile: '$(System.DefaultWorkingDirectory)/Dockerfile'
+    buildContext: '$(System.DefaultWorkingDirectory)'
+    repository: '623365056836.dkr.ecr.us-east-1.amazonaws.com/myecrtest'
+
+- task: ECRPushImage@1
+  inputs:
+    awsCredentials: 'awsserviceconnection'
+    regionName: 'us-east-1'
+    imageSource: 'webappdemo'
+    sourceImageName: '623365056836.dkr.ecr.us-east-1.amazonaws.com/myecrtest'
+    sourceImageTag: $(Build.BuildId)
+    pushTag: $(Build.BuildId)
+    repositoryName: 'myecrtest'
